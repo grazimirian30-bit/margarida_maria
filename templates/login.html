@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block titulo %}Login administrativo{% endblock %}
+{% block conteudo %}
+<main class="login-page">
+  <form method="post" class="login-card">
+    <img src="{{ url_for('static', filename='img/logo/logo-margarida-maria.png') }}" alt="Margarida Maria">
+
+    <h1>Painel Administrativo</h1>
+
+    {% with mensagens = get_flashed_messages(with_categories=true) %}
+      {% for tipo, mensagem in mensagens %}
+        <div class="toast {{ tipo }}">{{ mensagem }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <label>
+      Usuário
+      <input name="usuario" required>
+    </label>
+
+    <label>
+      Senha
+      <input type="password" name="senha" required>
+    </label>
+
+    <button type="submit">Entrar</button>
+
+    <a href="{{ url_for('inicio') }}">Voltar ao catálogo</a>
+
+    <small>Usuário inicial: grazi | Senha inicial: margarida2026</small>
+  </form>
+</main>
+{% endblock %}

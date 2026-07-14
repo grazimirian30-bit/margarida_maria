@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+{% block titulo %}Margarida Maria | Catálogo Premium{% endblock %}
+{% block conteudo %}
+
+{% with mensagens = get_flashed_messages(with_categories=true) %}
+  {% if mensagens %}
+    <div class="toast-area">
+      {% for tipo, mensagem in mensagens %}
+        <div class="toast {{ tipo }}">
+          <span>{{ mensagem }}</span>
+          <button type="button" onclick="this.parentElement.remove()">×</button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<div class="topbar">
+  <span>✿ Atendimento personalizado</span>
+  <span>🚚 Consulte a entrega</span>
+  <span>☎ WhatsApp: (24) 99296-3268</span>
+</div>
+
+<header class="header">
+  <div class="container nav">
+    <a class="brand" href="#inicio">
+      <img src="{{ url_for('static', filename='img/logo/logo-margarida-maria.png') }}" alt="Margarida Maria">
+    </a>
+
+    <button id="menuBtn" class="menu-btn" type="button">☰</button>
+
+    <nav id="menu">
+      <a href="#inicio">Início</a>
+      <a href="#categorias">Categorias</a>
+      <a href="#produtos">Produtos</a>
+      <a href="#ofertas">Ofertas</a>
+      <a href="#contato">Contato</a>
+    </nav>
+
+    <a class="admin-link" href="{{ url_for('login') }}">
+      Painel Administrativo
+    </a>
+  </div>
+</header>
+
+<main>
+<section id="inicio" class="hero">
+  <div class="container">
+    <img src="{{ url_for('static', filename='img/produtos/capa.png') }}" alt="Catálogo Margarida Maria">
+    <a class="hero-btn" href="#produtos">Ver produtos</a>
+  </div>
+</section>
+
+<section id="categorias" class="section">
+  <div class="container">
+    <div class="title">
+      <span>Explore</span>
+      <h2>Categorias</h2>
+    </div>
+
+    <div class="categories">
+      {% for categoria, icone in [
+        ("Todos", "✿"),
+        ("Cama", "🛏"),
+        ("Mesa", "🍽"),
+        ("Banho", "🛁"),
+        ("Infantil", "🧸"),
+        ("Cozinha", "🍳")
+      ] %}
+        <button class="cat-btn {% if loop.first %}active{% endif %}" data-category="{{ categoria }}">
+          <b>{{ icone }}</b>
+          <span>{{ categoria }}</span>
+        </button>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section id="produtos" class="section products">
+  <div class="container">
+    <div class="title">
+      <span>Catálogo completo</span>
+      <h2>Produtos em destaque</h2>
+    </div>
+
+    <div class="toolbar">
+      <input id="search" type="search" placeholder="Pesquisar produtos...">
+      <span id="count">{{ produtos|length }} produto(s)</span>
+    </div>
+
+    <div id="grid" class="grid">
+      {% for p in produtos %}
+        {% set imagens = p['imagens']|default('[]') %}
+        <article class="card" data-category="{{ p['categoria'] }}" data-name="{{ p['nome']|lower }}">
+          <div class="photo" onclick="abrirProduto({{ p['id'] }})">
+            {% set lista = imagens|tojson %}
+            <img
+              src="{{ url_for('static', filename='img/produtos/' + ((p['imagens']|from_json)[0] if false else '')) }}"
+              data-fallback="{{ p['imagens'] }}"
+              alt="{{ p['nome'] }}"
+              class="product-main-image"
+            >
+            {% if p['selo'] %}
+              <span class="seal">{{ p['selo'] }}</span>
+            {% endif %}
+            <span class="zoom-hint">🔍 Clique para ampliar</span>
+          </div>
+
+          <div class="card-body">
+            <small>{{ p['categoria'] }}</small>
+            <h3>{{ p['nome'] }}</h3>
+            <p>{{ p['descricao'] }}</p>
+
+            <div class="card-footer">
+              <strong>R$ {{ '%.2f'|format(p['preco'])|replace('.', ',') }}</strong>
+              <button type="button" onclick="abrirProduto({{ p['id'] }})">
+                Ver detalhes
+              </button>
+            </div>
+          </div>
+        </article>
+      {% else %}
+        <p class="empty">Nenhum produto cadastrado ainda.</p>
+      {% endfor %}
+    </div>
+
+    <div id="empty" class="empty" hidden>
+      Nenhum produto encontrado.
+    </div>
+  </div>
+</section>
+
+<section id="ofertas" class="offers">
+  <div class="container offers-grid">
+    <div>
+      <span>Novidades</span>
+      <h2>Receba ofertas no WhatsApp</h2>
+      <p>Cadastre seu contato e continue navegando normalmente.</p>
+    </div>
+
+    <form method="post" action="{{ url_for('cadastro') }}">
+      <input name="nome" placeholder="Seu nome" required>
+      <input name="telefone" placeholder="Seu WhatsApp" required>
+      <input name="email" type="email" placeholder="Seu e-mail (opcional)">
+      <button type="submit">Cadastrar</button>
+    </form>
+  </div>
+</section>
+
+<section id="contato" class="contact">
+  <div class="container contact-grid">
+    <img src="{{ url_for('static', filename='img/produtos/modelo-produtos.png') }}" alt="Coleção Margarida Maria">
+
+    <div>
+      <span>Atendimento</span>
+      <h2>Fale com a Margarida Maria</h2>
+      <p>Consulte cores, tamanhos, estoque, entrega e formas de pagamento.</p>
+      <a href="https://wa.me/5524992963268" target="_blank">
+        Abrir WhatsApp
+      </a>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="container">
+    <b>Margarida Maria</b>
+    <span>Catálogo virtual sem venda direta</span>
+  </div>
+</footer>
+
+<a class="zap" href="https://wa.me/5524992963268" target="_blank">☎</a>
+
+<div id="modal" class="modal">
+  <div class="modal-box">
+    <button id="closeModal" class="close" type="button">×</button>
+
+    <div class="gallery">
+      <div id="zoomContainer" class="zoom-container">
+        <img id="mainImage" alt="">
+      </div>
+
+      <div id="thumbs" class="thumbs"></div>
+      <p class="zoom-text">Clique ou toque na imagem para ampliar.</p>
+    </div>
+
+    <div class="info">
+      <span id="mCategory"></span>
+      <h2 id="mName"></h2>
+      <p id="mDescription"></p>
+
+      <dl>
+        <div><dt>Cor</dt><dd id="mColor"></dd></div>
+        <div><dt>Tamanho</dt><dd id="mSize"></dd></div>
+        <div><dt>Material</dt><dd id="mMaterial"></dd></div>
+        <div><dt>Disponibilidade</dt><dd id="mStock"></dd></div>
+      </dl>
+
+      <strong id="mPrice"></strong>
+      <a id="mWhatsapp" target="_blank">Consultar pelo WhatsApp</a>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".product-main-image").forEach(img => {
+    try {
+      const imagens = JSON.parse(img.dataset.fallback || "[]");
+      if (imagens.length) {
+        img.src = "/static/img/produtos/" + imagens[0];
+      }
+    } catch {
+      img.src = "/static/img/produtos/produto.svg";
+    }
+  });
+});
+</script>
+
+{% endblock %}

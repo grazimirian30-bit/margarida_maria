@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block titulo %}Painel Administrativo{% endblock %}
+{% block conteudo %}
+
+<header class="admin-head">
+  <div class="container">
+    <b>Painel Administrativo</b>
+
+    <div>
+      <a href="{{ url_for('inicio') }}">Ver catálogo</a>
+      <a href="{{ url_for('sair') }}">Sair</a>
+    </div>
+  </div>
+</header>
+
+<main class="container admin-page">
+  {% with mensagens = get_flashed_messages(with_categories=true) %}
+    {% for tipo, mensagem in mensagens %}
+      <div class="toast {{ tipo }}">{{ mensagem }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  <section class="dashboard">
+    <article>
+      <span>Produtos</span>
+      <strong>{{ produtos|length }}</strong>
+    </article>
+
+    <article>
+      <span>Clientes cadastrados</span>
+      <strong>{{ contatos|length }}</strong>
+    </article>
+
+    <article>
+      <span>Produtos sem estoque</span>
+      <strong>{{ produtos|selectattr('estoque', 'equalto', 0)|list|length }}</strong>
+    </article>
+  </section>
+
+  <section class="admin-card">
+    <div class="admin-title-row">
+      <div>
+        <h1>Produtos cadastrados</h1>
+        <p>Cadastre, edite, troque fotos ou exclua produtos pelo painel.</p>
+      </div>
+
+      <a class="admin-primary" href="{{ url_for('novo_produto') }}">
+        + Novo produto
+      </a>
+    </div>
+
+    <div class="admin-list">
+      {% for p in produtos %}
+        <article>
+          <div>
+            <b>{{ p['nome'] }}</b>
+            <span>
+              {{ p['categoria'] }} ·
+              R$ {{ '%.2f'|format(p['preco'])|replace('.', ',') }} ·
+              Estoque: {{ p['estoque'] }}
+            </span>
+          </div>
+
+          <div class="admin-actions">
+            <a href="{{ url_for('editar_produto', produto_id=p['id']) }}">
+              Editar
+            </a>
+
+            <form
+              method="post"
+              action="{{ url_for('excluir_produto', produto_id=p['id']) }}"
+              onsubmit="return confirm('Excluir este produto e suas imagens?')"
+            >
+              <button type="submit">Excluir</button>
+            </form>
+          </div>
+        </article>
+      {% else %}
+        <p>Nenhum produto cadastrado.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="admin-card">
+    <h2>Clientes cadastrados</h2>
+
+    <div class="admin-list">
+      {% for c in contatos %}
+        <article>
+          <div>
+            <b>{{ c['nome'] }}</b>
+            <span>
+              {{ c['telefone'] }}
+              {% if c['email'] %} · {{ c['email'] }}{% endif %}
+            </span>
+          </div>
+        </article>
+      {% else %}
+        <p>Nenhum cliente cadastrado.</p>
+      {% endfor %}
+    </div>
+  </section>
+</main>
+
+{% endblock %}

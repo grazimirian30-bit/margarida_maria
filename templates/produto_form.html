@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% block titulo %}
+  {% if produto %}Editar produto{% else %}Novo produto{% endif %}
+{% endblock %}
+
+{% block conteudo %}
+<header class="admin-head">
+  <div class="container">
+    <b>
+      {% if produto %}Editar produto{% else %}Novo produto{% endif %}
+    </b>
+
+    <div>
+      <a href="{{ url_for('admin') }}">Voltar ao painel</a>
+      <a href="{{ url_for('inicio') }}">Ver catálogo</a>
+    </div>
+  </div>
+</header>
+
+<main class="container admin-page">
+  {% with mensagens = get_flashed_messages(with_categories=true) %}
+    {% for tipo, mensagem in mensagens %}
+      <div class="toast {{ tipo }}">{{ mensagem }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  <section class="admin-card">
+    <form method="post" enctype="multipart/form-data" class="product-form">
+      <label>
+        Nome do produto
+        <input
+          name="nome"
+          value="{{ produto['nome'] if produto else '' }}"
+          required
+        >
+      </label>
+
+      <label>
+        Categoria
+        <select name="categoria" required>
+          {% for categoria in ["Cama", "Mesa", "Banho", "Infantil", "Cozinha"] %}
+            <option
+              value="{{ categoria }}"
+              {% if produto and produto['categoria'] == categoria %}selected{% endif %}
+            >
+              {{ categoria }}
+            </option>
+          {% endfor %}
+        </select>
+      </label>
+
+      <label>
+        Preço
+        <input
+          name="preco"
+          value="{{ ('%.2f'|format(produto['preco'])|replace('.', ',')) if produto else '' }}"
+          placeholder="129,90"
+          required
+        >
+      </label>
+
+      <label>
+        Estoque
+        <input
+          name="estoque"
+          type="number"
+          min="0"
+          value="{{ produto['estoque'] if produto else 0 }}"
+          required
+        >
+      </label>
+
+      <label>
+        Cor
+        <input name="cor" value="{{ produto['cor'] if produto else '' }}">
+      </label>
+
+      <label>
+        Tamanho
+        <input name="tamanho" value="{{ produto['tamanho'] if produto else '' }}">
+      </label>
+
+      <label>
+        Material
+        <input name="material" value="{{ produto['material'] if produto else '' }}">
+      </label>
+
+      <label>
+        Selo
+        <input
+          name="selo"
+          value="{{ produto['selo'] if produto else '' }}"
+          placeholder="Novo, Oferta, Destaque..."
+        >
+      </label>
+
+      <label class="full">
+        Descrição
+        <textarea name="descricao" rows="5" required>{{ produto['descricao'] if produto else '' }}</textarea>
+      </label>
+
+      <label class="full checkbox-label">
+        <input
+          type="checkbox"
+          name="destaque"
+          {% if produto and produto['destaque'] %}checked{% endif %}
+        >
+        Mostrar este produto primeiro no catálogo
+      </label>
+
+      {% if imagens %}
+        <div class="full">
+          <h3>Imagens atuais</h3>
+
+          <div class="current-images">
+            {% for imagem in imagens %}
+              <label class="current-image">
+                <img
+                  src="{{ url_for('static', filename='img/produtos/' + imagem) }}"
+                  alt=""
+                >
+                <span>
+                  <input
+                    type="checkbox"
+                    name="remover_imagens"
+                    value="{{ imagem }}"
+                  >
+                  Remover
+                </span>
+              </label>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+
+      <label class="full">
+        {% if produto %}
+          Adicionar novas imagens
+        {% else %}
+          Imagens do produto
+        {% endif %}
+
+        <input
+          type="file"
+          name="imagens"
+          accept=".png,.jpg,.jpeg,.webp"
+          multiple
+          {% if not produto %}required{% endif %}
+        >
+
+        <small>
+          Você pode escolher várias imagens de uma vez. A primeira será a principal.
+        </small>
+      </label>
+
+      <div class="full form-actions">
+        <a href="{{ url_for('admin') }}">Cancelar</a>
+        <button type="submit">
+          {% if produto %}Salvar alterações{% else %}Cadastrar produto{% endif %}
+        </button>
+      </div>
+    </form>
+  </section>
+</main>
+{% endblock %}
